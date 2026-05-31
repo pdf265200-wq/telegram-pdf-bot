@@ -6,18 +6,30 @@ from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
 import secrets
 import string
+import os
 
 from config import Config
 from database.models import Base, User, Payment, Operation, Favorite, Referral, Advertisement, UserRole, SubscriptionPlan, PaymentStatus
 
 class DatabaseManager:
     def __init__(self):
-        self.engine = create_async_engine(
-            Config.DATABASE_URL,
-            echo=False,
-            pool_size=20,
-            max_overflow=10
-        )
+        db_url = os.getenv('DATABASE_URL', Config.DATABASE_URL)
+        
+        # SQLite لا يدعم pool_size و max_overflow
+        if 'sqlite' in db_url:
+            self.engine = create_async_engine(
+                db_url,
+                echo=False
+            )
+        else:
+            # PostgreSQL يمكنه استخدام connection pooling
+            self.engine = create_async_engine(
+                db_url,
+                echo=False,
+                pool_size=20,
+                max_overflow=10
+            )
+        
         self.async_session = sessionmaker(
             self.engine,
             class_=AsyncSession,
@@ -41,7 +53,6 @@ class DatabaseManager:
     
     async def create_user(self, telegram_id: int, **kwargs) -> User:
         async with self.async_session() as session:
-            # Generate unique referral code
             referral_code = await self._generate_referral_code()
             
             user = User(
@@ -84,7 +95,6 @@ class DatabaseManager:
         if user.premium_until and user.premium_until > datetime.utcnow():
             return True
         
-        # Premium expired, downgrade to free
         if user.plan != SubscriptionPlan.FREE:
             await self.update_user(
                 telegram_id,
@@ -99,12 +109,10 @@ class DatabaseManager:
         if not user:
             return False
         
-        # Check if premium
         is_premium = await self.check_premium_status(telegram_id)
         if is_premium:
             return True
         
-        # Check daily operations for free users
         today = datetime.utcnow().date()
         async with self.async_session() as session:
             result = await session.execute(
@@ -132,7 +140,6 @@ class DatabaseManager:
             )
             session.add(operation)
             
-            # Update user stats
             user.total_operations += 1
             user.last_activity = datetime.utcnow()
             
@@ -170,7 +177,6 @@ class DatabaseManager:
             payment.status = PaymentStatus.COMPLETED
             payment.completed_at = datetime.utcnow()
             
-            # Update user plan
             user = payment.user
             user.plan = payment.plan
             
@@ -179,19 +185,16 @@ class DatabaseManager:
             elif payment.plan == SubscriptionPlan.PREMIUM_YEARLY:
                 user.premium_until = datetime.utcnow() + timedelta(days=365)
             elif payment.plan == SubscriptionPlan.LIFETIME:
-                user.premium_until = None  # Never expires
+                user.premium_until = None
             
             await session.commit()
             return True
     
     async def add_referral(self, referrer_id: int, referred_id: int) -> bool:
         async with self.async_session() as session:
-            # Check if already referred
             existing = await session.execute(
                 select(Referral).where(
-                    and_(
-                        Referral.referred_id == referred_id
-                    )
+                    and_(Referral.referred_id == referred_id)
                 )
             )
             if existing.scalar_one_or_none():
@@ -203,12 +206,10 @@ class DatabaseManager:
             )
             session.add(referral)
             
-            # Update referrer stats
             referrer = await self.get_user(referrer_id)
             if referrer:
                 referrer.referral_count += 1
                 
-                # Add premium days as reward
                 reward_days = min(Config.REFERRAL_DAYS_REWARD, Config.MAX_REFERRAL_REWARDS - referrer.referral_earnings)
                 if reward_days > 0:
                     referrer.referral_earnings += reward_days
