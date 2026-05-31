@@ -1,6 +1,7 @@
 python-telegram-bot[job-queue]==20.7
 PyPDF2==3.0.1
 pypdf==4.1.0
+pdfplumber==0.11.9
 Pillow==10.2.0
 pytesseract==0.3.10
 pdf2image==1.17.0
@@ -9,6 +10,7 @@ openpyxl==3.1.2
 python-pptx==0.6.23
 reportlab==4.1.0
 img2pdf==0.5.1
+pikepdf==9.0.0
 python-dotenv==1.0.1
 aiohttp==3.9.3
 aiofiles==23.2.1
@@ -17,3 +19,8 @@ sqlalchemy==2.0.27
 cryptography==42.0.5
 python-magic==0.4.27
 tenacity==8.2.3
+pdfminer.six==20231228
+pypdfium2==4.30.0
+charset-normalizer==3.3.2
+lxml==5.1.0
+openai==1.12.0
