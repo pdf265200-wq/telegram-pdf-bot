@@ -19,8 +19,6 @@ sqlalchemy==2.0.27
 cryptography==42.0.5
 python-magic==0.4.27
 tenacity==8.2.3
-pdfminer.six==20231228
-pypdfium2==4.30.0
 charset-normalizer==3.3.2
 lxml==5.1.0
 openai==1.12.0
