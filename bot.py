@@ -7,7 +7,6 @@ import sys
 import os
 from pathlib import Path
 
-# إعداد التسجيل
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
@@ -23,6 +22,9 @@ from database.db_manager import db
 class PDFBot:
     def __init__(self):
         self.token = Config.BOT_TOKEN
+        if not self.token:
+            logger.error("❌ BOT_TOKEN not set!")
+            sys.exit(1)
         self.app = None
     
     async def initialize(self):
@@ -55,180 +57,78 @@ class PDFBot:
             self.app.add_handler(CommandHandler("menu", start_handler.menu))
             self.app.add_handler(CommandHandler("admin", admin_handler.admin_panel))
             
-            # PDF Tools menu
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_pdf_menu, pattern="^pdf_tools$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_images_to_pdf, pattern="^images_to_pdf$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_merge_pdf, pattern="^merge_pdf$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_compress_pdf, pattern="^compress_pdf$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_pdf_to_word, pattern="^pdf_to_word$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_word_to_pdf, pattern="^word_to_pdf$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_rotate_pdf, pattern="^rotate_pdf$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_add_watermark, pattern="^add_watermark$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_extract_images, pattern="^extract_images$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_protect_pdf, pattern="^protect_pdf$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_remove_password, pattern="^remove_password$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_rearrange_pages, pattern="^rearrange_pages$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_delete_pages, pattern="^delete_pages$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_extract_pages, pattern="^extract_pages$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_repair_pdf, pattern="^repair_pdf$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_add_page_numbers, pattern="^add_page_numbers$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_excel_to_pdf, pattern="^excel_to_pdf$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_ppt_to_pdf, pattern="^ppt_to_pdf$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_text_to_pdf, pattern="^text_to_pdf$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_pdf_to_text, pattern="^pdf_to_text$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_pdf_to_html, pattern="^pdf_to_html$"
-            ))
+            # PDF Tools
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_pdf_menu, pattern="^pdf_tools$"))
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_images_to_pdf, pattern="^images_to_pdf$"))
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_merge_pdf, pattern="^merge_pdf$"))
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_compress_pdf, pattern="^compress_pdf$"))
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_pdf_to_word, pattern="^pdf_to_word$"))
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_word_to_pdf, pattern="^word_to_pdf$"))
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_rotate_pdf, pattern="^rotate_pdf$"))
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_add_watermark, pattern="^add_watermark$"))
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_protect_pdf, pattern="^protect_pdf$"))
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_remove_password, pattern="^remove_password$"))
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_extract_images, pattern="^extract_images$"))
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_rearrange_pages, pattern="^rearrange_pages$"))
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_delete_pages, pattern="^delete_pages$"))
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_extract_pages, pattern="^extract_pages$"))
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_repair_pdf, pattern="^repair_pdf$"))
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_add_page_numbers, pattern="^add_page_numbers$"))
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_excel_to_pdf, pattern="^excel_to_pdf$"))
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_ppt_to_pdf, pattern="^ppt_to_pdf$"))
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_text_to_pdf, pattern="^text_to_pdf$"))
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_pdf_to_text, pattern="^pdf_to_text$"))
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_pdf_to_html, pattern="^pdf_to_html$"))
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_quality_selection, pattern="^quality_"))
+            self.app.add_handler(CallbackQueryHandler(pdf_tools_handler.handle_create_pdf, pattern="^create_pdf$"))
             
-            # OCR
-            self.app.add_handler(CallbackQueryHandler(
-                ocr_handler.handle_ocr_menu, pattern="^ocr_menu$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                ocr_handler.handle_ocr_image, pattern="^ocr_image$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                ocr_handler.handle_ocr_pdf, pattern="^ocr_pdf$"
-            ))
-            
-            # AI
-            self.app.add_handler(CallbackQueryHandler(
-                ai_features_handler.handle_ai_menu, pattern="^ai_menu$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                ai_features_handler.handle_summarize, pattern="^ai_summarize$"
-            ))
+            # OCR & AI
+            self.app.add_handler(CallbackQueryHandler(ocr_handler.handle_ocr_menu, pattern="^ocr_menu$"))
+            self.app.add_handler(CallbackQueryHandler(ai_features_handler.handle_ai_menu, pattern="^ai_menu$"))
             
             # Payments
-            self.app.add_handler(CallbackQueryHandler(
-                payments_handler.handle_pricing, pattern="^pricing$"
-            ))
-            self.app.add_handler(CallbackQueryHandler(
-                payments_handler.handle_buy_premium, pattern="^buy_premium_"
-            ))
+            self.app.add_handler(CallbackQueryHandler(payments_handler.handle_pricing, pattern="^pricing$"))
+            self.app.add_handler(CallbackQueryHandler(payments_handler.handle_buy_premium, pattern="^buy_premium_"))
             
-            # Referrals
-            self.app.add_handler(CallbackQueryHandler(
-                referrals_handler.handle_referrals, pattern="^referrals$"
-            ))
-            
-            # Ads
-            self.app.add_handler(CallbackQueryHandler(
-                ads_handler.handle_watch_ad, pattern="^watch_ad$"
-            ))
+            # Referrals & Ads
+            self.app.add_handler(CallbackQueryHandler(referrals_handler.handle_referrals, pattern="^referrals$"))
+            self.app.add_handler(CallbackQueryHandler(ads_handler.handle_watch_ad, pattern="^watch_ad$"))
             
             # Main menu
-            self.app.add_handler(CallbackQueryHandler(
-                start_handler.menu, pattern="^main_menu$"
-            ))
-            
-            # Quality selection
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_quality_selection, pattern="^quality_"
-            ))
-            
-            # Create PDF from images
-            self.app.add_handler(CallbackQueryHandler(
-                pdf_tools_handler.handle_create_pdf, pattern="^create_pdf$"
-            ))
+            self.app.add_handler(CallbackQueryHandler(start_handler.menu, pattern="^main_menu$"))
             
             # File handlers
-            self.app.add_handler(MessageHandler(
-                filters.Document.ALL, pdf_tools_handler.handle_document
-            ))
-            self.app.add_handler(MessageHandler(
-                filters.PHOTO, pdf_tools_handler.handle_photo
-            ))
+            self.app.add_handler(MessageHandler(filters.Document.ALL, pdf_tools_handler.handle_document))
+            self.app.add_handler(MessageHandler(filters.PHOTO, pdf_tools_handler.handle_photo))
+            self.app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, start_handler.handle_text))
             
-            # Text handler
-            self.app.add_handler(MessageHandler(
-                filters.TEXT & ~filters.COMMAND, start_handler.handle_text
-            ))
+            logger.info("✅ All handlers added")
             
         except Exception as e:
-            logger.error(f"Failed to import handlers: {e}")
+            logger.error(f"❌ Handler error: {e}")
             raise
         
-        # Error handler
         self.app.add_error_handler(self.error_handler)
-        
         logger.info("✅ Bot initialized successfully")
     
     async def error_handler(self, update: Update, context):
-        """معالجة الأخطاء"""
-        logger.error(f"Error occurred: {context.error}")
+        logger.error(f"Error: {context.error}")
         try:
             if update and update.effective_message:
-                await update.effective_message.reply_text(
-                    "❌ حدث خطأ. يرجى المحاولة مرة أخرى."
-                )
+                await update.effective_message.reply_text("❌ حدث خطأ. حاول مرة أخرى.")
         except:
             pass
     
     def run(self):
-        """تشغيل البوت"""
+        """تشغيل البوت - استخدام polling دائماً"""
         asyncio.run(self.initialize())
-        
-        webhook_url = os.getenv('RAILWAY_PUBLIC_DOMAIN')
-        
-        if webhook_url:
-            port = int(os.getenv('PORT', '8000'))
-            logger.info(f"🌐 Starting webhook on port {port}")
-            self.app.run_webhook(
-                listen="0.0.0.0",
-                port=port,
-                webhook_url=f"https://{webhook_url}/webhook"
-            )
-        else:
-            logger.info("📡 Starting polling...")
-            self.app.run_polling(allowed_updates=Update.ALL_TYPES)
+        logger.info("📡 Starting polling...")
+        self.app.run_polling(allowed_updates=Update.ALL_TYPES)
 
 def main():
     bot = PDFBot()
     try:
         bot.run()
-    except KeyboardInterrupt:
-        logger.info("Bot stopped")
     except Exception as e:
         logger.error(f"Fatal error: {e}")
         sys.exit(1)
